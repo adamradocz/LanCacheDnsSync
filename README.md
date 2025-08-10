@@ -76,7 +76,6 @@ networks:
 ## Repository Structure
 ```powershell
 📁                                # Root of the repository.
-├─📁.config                       # Desired State Configuration (DSC) scripts to setup the development environment.
 ├─📁.github                       # GitHub workflows and templates.
 │ └─📁workflows                   # CI/CD pipeline definitions.
 ├─📁scripts                       # Helper scripts for Docker.
