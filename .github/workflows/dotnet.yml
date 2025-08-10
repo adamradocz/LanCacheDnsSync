@@ -1,0 +1,52 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.config/**'
+      - '.dockerignore'
+      - '.gitignore'
+      - '*.sh'
+      - 'LICENSE'
+      - 'README.md'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.config/**'
+      - '.dockerignore'
+      - '.gitignore'
+      - '*.sh'
+      - 'LICENSE'
+      - 'README.md'
+
+env:
+  BUILD_CONFIGURATION: 'Release'
+
+jobs:
+  build:
+
+    name: Build on ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+    - name: Test
+      run: dotnet test --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
