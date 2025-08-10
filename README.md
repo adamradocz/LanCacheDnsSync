@@ -72,3 +72,20 @@ networks:
 |---------------------|---------------------------------------------|
 | /data/cache-domains | Directory where cache-domains will be cloned and updated. |
 | /data/userfilters   | Directory where the `lancache.txt` file will be created and updated. Map it to your AdGuard Home user filters directory. |
+
+## Repository Structure
+```powershell
+📁                                # Root of the repository.
+├─📁.config                       # Desired State Configuration (DSC) scripts to setup the development environment.
+├─📁.github                       # GitHub workflows and templates.
+│ └─📁workflows                   # CI/CD pipeline definitions.
+├─📁scripts                       # Helper scripts for Docker.
+│ ├─🗎check-for-updates.sh         # Script to check for DNS rules updates.
+│ ├─🗎entrypoint.sh                # Entrypoint script for the Docker container.
+│ └─🗎update-dns-rewrite-rules.sh  # Script to update the DNS rewrite rules using the LanCacheDnsRewriteGen.
+├─📁src                           # Source code.
+├─🗎.editorconfig                  # Coding styles.
+├─🗎.gitignore                     # Ignore build artifacts, user secrets, etc.
+├─🗎LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
+└─🗎README.md                      # You're reading this right now.
+```

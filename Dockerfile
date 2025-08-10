@@ -11,6 +11,8 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/LanCacheDnsRewriteGen/LanCacheDnsRewriteGen.csproj", "src/LanCacheDnsRewriteGen/"]
 RUN dotnet restore "./src/LanCacheDnsRewriteGen/LanCacheDnsRewriteGen.csproj"
+# The scrips directory should be excluded so the build stage does not need to rebuild when only scripts change, they are copied in the final stage.
+# But Docker does not support --exclude option in COPY command yet.
 COPY . .
 WORKDIR "/src/src/LanCacheDnsRewriteGen"
 RUN dotnet build "./LanCacheDnsRewriteGen.csproj" -c $BUILD_CONFIGURATION -o /app/build
@@ -24,7 +26,8 @@ RUN dotnet publish "./LanCacheDnsRewriteGen.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY entrypoint.sh check-for-updates.sh update-dns-rewrite-rules.sh ./
+
+COPY scripts/*.sh ./
 
 ENV LANCACHE_IPV4="" \
     CACHE_DOMAINS_REPO="https://github.com/uklans/cache-domains.git"
