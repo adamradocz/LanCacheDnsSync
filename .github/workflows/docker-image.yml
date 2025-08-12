@@ -23,7 +23,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ vars.DOCKER_USERNAME }}/lancache-dns-sync
+        images: ${{ vars.DOCKERHUB_USERNAME }}/lancache-dns-sync
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
