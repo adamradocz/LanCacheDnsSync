@@ -17,6 +17,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Extract Docker image metadata (tags, labels)
+      id: meta
       uses: docker/metadata-action@v5
       with:
         images: ${{ vars.DOCKER_USERNAME }}/lancache-dns-sync
