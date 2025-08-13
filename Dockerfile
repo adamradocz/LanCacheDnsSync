@@ -37,7 +37,7 @@ RUN apt-get update && apt-get install -y git cron \
     && rm -rf /var/lib/apt/lists/* \
     # Setup cron job to run the script daily
     && chmod +x ./entrypoint.sh ./check-for-updates.sh ./update-dns-rewrite-rules.sh \
-    && mkdir -p /data/userfilters \
+    && mkdir -p /userfilters \
     # Direct cron output to stdout/stderr, instead of a log file.
     && echo "0 0 * * * /app/check-for-updates.sh >> /proc/1/fd/1 2>&1" | crontab -
 
