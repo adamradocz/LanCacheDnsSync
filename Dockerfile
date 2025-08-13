@@ -41,6 +41,6 @@ RUN apt-get update && apt-get install -y git cron \
     # Direct cron output to stdout/stderr, instead of a log file.
     && echo "0 0 * * * /app/check-for-updates.sh >> /proc/1/fd/1 2>&1" | crontab -
 
-VOLUME ["/data/cache-domains", "/data/userfilters"]
+VOLUME ["/data/cache-domains", "/userfilters"]
 
 CMD ["./entrypoint.sh"]
