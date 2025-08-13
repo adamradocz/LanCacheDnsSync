@@ -53,7 +53,7 @@ services:
       - LANCACHE_IPV4=192.168.0.4
     volumes:  
       - ${APPDATA_PATH}/LanCacheDnsSync/data:/data
-      - ${APPDATA_PATH}/AdGuardHome/work/userfilters:/data/userfilters
+      - ${APPDATA_PATH}/AdGuardHome/work/userfilters:/userfilters
     networks:
       - private-net
 
@@ -93,16 +93,21 @@ networks:
 
 ## Repository Structure
 ```powershell
-📁                                # Root of the repository.
-├─📁.github                       # GitHub workflows and templates.
-│ └─📁workflows                   # CI/CD pipeline definitions.
-├─📁scripts                       # Helper scripts for Docker.
-│ ├─🗎check-for-updates.sh         # Script to check for DNS rules updates.
-│ ├─🗎entrypoint.sh                # Entrypoint script for the Docker container.
-│ └─🗎update-dns-rewrite-rules.sh  # Script to update the DNS rewrite rules using the LanCacheDnsRewriteGen.
-├─📁src                           # Source code.
-├─🗎.editorconfig                  # Coding styles.
-├─🗎.gitignore                     # Ignore build artifacts, user secrets, etc.
-├─🗎LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
-└─🗎README.md                      # You're reading this right now.
+📁                               # Root of the repository.
+├─📁.github                      # GitHub workflows and templates.
+│ └─📁workflows                  # CI/CD pipeline definitions.
+├─📁scripts                      # Helper scripts for Docker.
+│ ├─check-for-updates.sh         # Script to check for DNS rules updates.
+│ ├─entrypoint.sh                # Entrypoint script for the Docker container.
+│ └─update-dns-rewrite-rules.sh  # Script to update the DNS rewrite rules using the LanCacheDnsRewriteGen.
+├─📁src                          # Source code.
+├─.editorconfig                  # Coding styles.
+├─.gitignore                     # Ignore build artifacts, user secrets, etc.
+├─LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
+└─README.md                      # You're reading this right now.
 ```
+
+## Used technologies & frameworks
+- [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [ConsoleAppFramework](https://github.com/Cysharp/ConsoleAppFramework)
+- [Docker](https://www.docker.com/)
