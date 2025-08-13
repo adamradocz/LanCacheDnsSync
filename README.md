@@ -46,6 +46,17 @@ services:
       lan-net:
          ipv4_address: 192.168.0.4
 
+  lancache-dns-sync:
+    image: adamradocz/lancache-dns-sync:latest
+    container_name: lancache-dns-sync
+    environment:
+      - LANCACHE_IPV4=192.168.0.4
+    volumes:  
+      - ${APPDATA_PATH}/LanCacheDnsSync/data:/data
+      - ${APPDATA_PATH}/AdGuardHome/work/userfilters:/data/userfilters
+    networks:
+      - private-net
+
 # Network configuration
 networks:
 
@@ -59,13 +70,20 @@ networks:
       config:
         - subnet: 192.168.0.0/24
           gateway: 192.168.0.1
+
+  private-net:
+    name: private-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
 ```
 
 ### Environment Variables
 | Variable           | Description                                 | Required | Default         |
 |--------------------|---------------------------------------------|----------|-----------------|
 | LANCACHE_IPV4      | IP address of your lancache chaching server | Yes      |                 |
-| CACHE_DOMAINS_REPO | Password for AdGuard Home                   | Yes      | https://github.com/uklans/cache-domains.git This is the same default repository used by LanCache-DNS. |
+| CACHE_DOMAINS_REPO | Password for AdGuard Home                   | No       | https://github.com/uklans/cache-domains.git This is the same default repository used by LanCache-DNS. |
 
 ### Volumes
 | Volume              | Description                                 |
