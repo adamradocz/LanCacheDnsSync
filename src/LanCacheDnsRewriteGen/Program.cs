@@ -1,30 +1,26 @@
-﻿using ConsoleAppFramework;
+﻿using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using ConsoleAppFramework;
 
 namespace LanCacheDnsRewriteGen;
 
-internal class Program
+internal static class Program
 {
     private const string _cacheDomainsFileName = "cache_domains.json";
     private const string _lancacheDnsRewriteFileName = "lancache.txt";
-    private const int _expectedMaximumGeneratedCharaterCount = 150000;
+    private const int _expectedMaximumGeneratedCharaterCount = 15_000;
 
-    public static async Task Main(string[] args)
+    private static readonly StringBuilder _stringBuilder = new(_expectedMaximumGeneratedCharaterCount);
+
+    public static void Main(string[] args)
     {
-        await ConsoleApp.RunAsync(args, GenerateAdGuardHomeRules);
+        ConsoleApp.Run(args, GenerateAdGuardHomeRules);
     }
 
-    private static async Task GenerateAdGuardHomeRules(string repositoryPath, string lancacheIpv4, DateTimeOffset lastModified, CancellationToken cancellationToken)
+    private static void GenerateAdGuardHomeRules(string repositoryPath, string lancacheIpv4, string lastModified)
     {
-        if (!IPAddress.TryParse(lancacheIpv4, out _))
-        {
-            Console.Error.WriteLine($"Error: Invalid IPv4 address: {lancacheIpv4}");
-            Environment.ExitCode = 1;
-            return;
-        }
-
         string cacheDomainsFilePath = Path.Combine(repositoryPath, _cacheDomainsFileName);
         if (!File.Exists(cacheDomainsFilePath))
         {
@@ -33,8 +29,22 @@ internal class Program
             return;
         }
 
-        await using FileStream utf8Json = new(cacheDomainsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        UklansCacheDomains? cacheDomains = await JsonSerializer.DeserializeAsync<UklansCacheDomains>(utf8Json, cancellationToken: cancellationToken);
+        if (!IPAddress.TryParse(lancacheIpv4, out _))
+        {
+            Console.Error.WriteLine($"Error: Invalid IPv4 address: {lancacheIpv4}");
+            Environment.ExitCode = 1;
+            return;
+        }
+        
+        if (!DateTimeOffset.TryParse(lastModified, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTimeOffset repositoryLastModified))
+        {
+            Console.Error.WriteLine($"Error: Invalid ISO 8601 date format: {lastModified}");
+            Environment.ExitCode = 1;
+            return;
+        }
+
+        using FileStream utf8Json = new(cacheDomainsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        UklansCacheDomains? cacheDomains = JsonSerializer.Deserialize<UklansCacheDomains>(utf8Json);
         if (cacheDomains is null)
         {
             Console.Error.WriteLine($"Error: Unable to deserialize {_cacheDomainsFileName}.");
@@ -42,24 +52,23 @@ internal class Program
             return;
         }
 
-        StringBuilder stringBuilder = new(_expectedMaximumGeneratedCharaterCount);
-        GenerateFileHeader(stringBuilder, lastModified);
+        GenerateFileHeader(repositoryLastModified);
 
         foreach (UklansCacheDomain cacheDomain in cacheDomains.CacheDomains)
         {
-            GenerateDnsRewriteRules(stringBuilder, cacheDomain, repositoryPath, lancacheIpv4);
+            GenerateDnsRewriteRules(cacheDomain, repositoryPath, lancacheIpv4);
         }
 
-        await File.WriteAllTextAsync(_lancacheDnsRewriteFileName, stringBuilder.ToString(), cancellationToken);
+        File.WriteAllText(_lancacheDnsRewriteFileName, _stringBuilder.ToString());
         Console.WriteLine("LanCache DNS rewrite rules successfully generated.");
     }
 
-    private static void GenerateFileHeader(StringBuilder stringBuilder, DateTimeOffset lastModified)
+    private static void GenerateFileHeader(DateTimeOffset repositoryLastModified)
     {
-        string lastModifiedIso8601 = lastModified.ToString("o");
+        string lastModifiedIso8601 = repositoryLastModified.ToString("o");
         string generatedAtIso8601 = DateTimeOffset.Now.ToString("o");
 
-        _ = stringBuilder.AppendLine("! Title: LanCache DNS rewrite")
+        _ = _stringBuilder.AppendLine("! Title: LanCache DNS rewrite")
                         .AppendLine("! Description: AdGuard DNS filtering rules for redirecting download requests to LanCache caching proxy server.")
                         .AppendLine($"! Version: {lastModifiedIso8601}")
                         .AppendLine("! Homepage: https://github.com/uklans/cache-domains")
@@ -68,24 +77,24 @@ internal class Program
                         .AppendLine("!");
     }
 
-    private static void GenerateDnsRewriteRules(StringBuilder stringBuilder, UklansCacheDomain cacheDomain, string repositoryPath, string lancacheIpv4)
+    private static void GenerateDnsRewriteRules(UklansCacheDomain cacheDomain, string repositoryPath, string lancacheIpv4)
     {
-        GenerateSectionHeader(stringBuilder, cacheDomain);
-        GenerateRules(stringBuilder, cacheDomain, repositoryPath, lancacheIpv4);
+        GenerateSectionHeader(cacheDomain);
+        GenerateRules(cacheDomain, repositoryPath, lancacheIpv4);
     }
 
-    private static void GenerateSectionHeader(StringBuilder stringBuilder, UklansCacheDomain cacheDomain)
+    private static void GenerateSectionHeader(UklansCacheDomain cacheDomain)
     {
-        _ = stringBuilder.AppendLine($"! === {cacheDomain.Name} ===")
+        _ = _stringBuilder.AppendLine($"! === {cacheDomain.Name} ===")
             .AppendLine($"! {cacheDomain.Description}");
 
         if (!string.IsNullOrEmpty(cacheDomain.Notes))
         {
-            _ = stringBuilder.AppendLine($"! Notes: {cacheDomain.Notes}");
+            _ = _stringBuilder.AppendLine($"! Notes: {cacheDomain.Notes}");
         }
     }
             
-    private static void GenerateRules(StringBuilder stringBuilder, UklansCacheDomain cacheDomain, string repositoryPath, string lancacheIpv4)
+    private static void GenerateRules(UklansCacheDomain cacheDomain, string repositoryPath, string lancacheIpv4)
     {
         foreach (string domainFile in cacheDomain.DomainFiles)
         {
@@ -97,7 +106,7 @@ internal class Program
                 continue;
             }
 
-            ProcessDomainFile(stringBuilder, lancacheIpv4, domainFilePath);
+            ProcessDomainFile(lancacheIpv4, domainFilePath);
         }
     }
 
@@ -107,7 +116,7 @@ internal class Program
     // Output text:
     // ||cdn.blizzard.com^$dnsrewrite=192.168.0.4
     // ||cdn.blizzard.com^$dnstype=AAAA
-    private static void ProcessDomainFile(StringBuilder stringBuilder, string lancacheIpv4, string domainFilePath)
+    private static void ProcessDomainFile(string lancacheIpv4, string domainFilePath)
     {
         foreach (string line in File.ReadLines(domainFilePath))
         {
@@ -131,22 +140,22 @@ internal class Program
                 domain = lineSpan;
             }
 
-            GenerateIpv4Rule(stringBuilder, numberOfStartAnchors, domain, lancacheIpv4);
-            GenerateIpv6Rule(stringBuilder, numberOfStartAnchors, domain);
+            GenerateIpv4Rule(numberOfStartAnchors, domain, lancacheIpv4);
+            GenerateIpv6Rule(numberOfStartAnchors, domain);
         }
     }
 
-    private static void GenerateIpv4Rule(StringBuilder stringBuilder, int numberOfStartAnchors, in ReadOnlySpan<char> domain, string lancacheIpv4)
+    private static void GenerateIpv4Rule(int numberOfStartAnchors, in ReadOnlySpan<char> domain, string lancacheIpv4)
     {
-        _ = stringBuilder.Append('|', numberOfStartAnchors)
+        _ = _stringBuilder.Append('|', numberOfStartAnchors)
             .Append(domain)
             .Append($"^$dnsrewrite={lancacheIpv4}")
             .AppendLine();
     }
 
-    private static void GenerateIpv6Rule(StringBuilder stringBuilder, int numberOfStartAnchors, in ReadOnlySpan<char> domain)
+    private static void GenerateIpv6Rule(int numberOfStartAnchors, in ReadOnlySpan<char> domain)
     {
-        _ = stringBuilder.Append('|', numberOfStartAnchors)
+        _ = _stringBuilder.Append('|', numberOfStartAnchors)
             .Append(domain)
             .Append("^$dnstype=AAAA")
             .AppendLine();
