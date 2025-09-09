@@ -49,6 +49,8 @@ services:
   lancache-dns-sync:
     image: adamradocz/lancache-dns-sync:latest
     container_name: lancache-dns-sync
+    depends_on:
+      - monolithic
     environment:
       - LANCACHE_IPV4=192.168.0.4
     volumes:  
