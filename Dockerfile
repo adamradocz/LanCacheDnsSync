@@ -2,10 +2,9 @@ FROM alpine:latest
 
 # git     - clone/update the cache-domains repository
 # jq      - parse config.json / cache_domains.json
-# gawk    - rule transformation (POSIX-safe superset of BusyBox awk)
 # su-exec - drop privileges to user-specified PUID/PGID
 # shadow  - user/group modification utilities (usermod, groupmod)
-RUN apk add --no-cache git jq gawk su-exec shadow \
+RUN apk add --no-cache git jq su-exec shadow \
     && git config --system --add safe.directory "*" \
     && addgroup -g 1000 appgroup \
     && adduser -D -u 1000 -G appgroup -h /app -s /bin/sh appuser
