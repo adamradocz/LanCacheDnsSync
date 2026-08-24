@@ -108,7 +108,6 @@ The container clones `cache-domains` and generates the rewrite rules immediately
 ├─📁scripts                      # Helper scripts for Docker.
 │ ├─check-for-updates.sh         # Script to check for DNS rules updates.
 │ ├─create-adguardhome-ash.sh    # POSIX/ash script for Alpine Docker container.
-│ ├─create-adguardhome-bash.sh   # Bash script for standalone / local execution.
 │ └─entrypoint.sh                # Entrypoint script for the Docker container.
 ├─.gitignore                     # Ignore build artifacts, user secrets, etc.
 ├─LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
