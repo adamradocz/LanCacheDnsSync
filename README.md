@@ -7,7 +7,7 @@ It serves users who already have a running local DNS server (AdGuard Home) in th
 
 Demonstration of how to use LanCache DNS Sync with AdGuard Home and LanCache Monolithic cache server. Adapt the `docker-compose.yml` file to your environment, ensuring that the IP addresses and paths match your setup.
 
-Before starting the stack, create a `config.json` (based on [`scripts/config.example.json`](scripts/config.example.json)) and place it where it will be mounted into the `lancache-dns-sync` container, e.g. `${APPDATA_PATH}/LanCacheDnsSync/config.json`. It controls the cache-server IP(s) per CDN group and whether a single combined rule file (`combined_output: true`) or one file per CDN (`combined_output: false`) is produced.
+Before starting the stack, create a `config.json` (based on [`scripts/config.example.json`](scripts/config.example.json)) and place it where it will be mounted into the `lancache-dns-sync` container (`${APPDATA_PATH}/LanCacheDnsSync/data/config.json`). It controls the cache-server IP(s) per CDN group and whether a single combined rule file (`combined_output: true`) or one file per CDN (`combined_output: false`) is produced.
 
 
 ```yaml
