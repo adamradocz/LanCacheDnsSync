@@ -43,6 +43,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
+          pull: true
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/lancache-dns-sync:latest
           provenance: true
