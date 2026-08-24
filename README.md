@@ -1,4 +1,4 @@
-﻿# LanCache DNS Sync
+# LanCache DNS Sync
 
 LanCache DNS Sync designed to automate the synchronization of LanCache DNS entries. It fetches DNS records daily, used by LanCache, and updates the local DNS server (AdGuard Home) configuration.
 It serves users who already have a running local DNS server (AdGuard Home) in their LAN and wish to use that server to resolve DNS queries for LanCache, instead of using the default LanCache-DNS container.
@@ -6,6 +6,9 @@ It serves users who already have a running local DNS server (AdGuard Home) in th
 ## Usage
 
 Demonstration of how to use LanCache DNS Sync with AdGuard Home and LanCache Monolithic cache server. Adapt the `docker-compose.yml` file to your environment, ensuring that the IP addresses and paths match your setup.
+
+Before starting the stack, create a `config.json` (based on [`scripts/config.example.json`](scripts/config.example.json)) and place it where it will be mounted into the `lancache-dns-sync` container, e.g. `${APPDATA_PATH}/LanCacheDnsSync/config.json`. It controls the cache-server IP(s) per CDN group and whether a single combined rule file (`combined_output: true`) or one file per CDN (`combined_output: false`) is produced.
+
 
 ```yaml
 services:
@@ -49,10 +52,10 @@ services:
   lancache-dns-sync:
     image: adamradocz/lancache-dns-sync:latest
     container_name: lancache-dns-sync
-    depends_on:
-      - monolithic
     environment:
-      - LANCACHE_IPV4=192.168.0.4
+      - PUID=1000
+      - PGID=1000
+      - CACHE_DOMAINS_REPO=https://github.com/uklans/cache-domains.git
     volumes:  
       - ${APPDATA_PATH}/LanCacheDnsSync/data:/data
       - ${APPDATA_PATH}/AdGuardHome/work/userfilters:/userfilters
@@ -81,20 +84,25 @@ networks:
         - subnet: 172.21.0.0/24
 ```
 
+
 ### Environment Variables
-| Variable           | Description                                 | Required | Default         |
-|--------------------|---------------------------------------------|----------|-----------------|
-| LANCACHE_IPV4      | IP address of your lancache chaching server | Yes      |                 |
-| CACHE_DOMAINS_REPO | Password for AdGuard Home                   | No       | https://github.com/uklans/cache-domains.git This is the same default repository used by LanCache-DNS. |
+| Variable            | Description                                                                                       | Required | Default                                     |
+|---------------------|---------------------------------------------------------------------------------------------------|----------|---------------------------------------------|
+| PUID                | User ID under which the update scripts and rule generation run. Matches host user permissions.    | No       | 1000                                        |
+| PGID                | Group ID under which the update scripts and rule generation run. Matches host group permissions.  | No       | 1000                                        |
+| CACHE_DOMAINS_REPO  | Git URL of the cache-domains repository to clone. The repository's default branch is always used. | No       | https://github.com/uklans/cache-domains.git |
 
 ### Volumes
-| Volume              | Description                                 |
-|---------------------|---------------------------------------------|
-| /data/cache-domains | Directory where cache-domains will be cloned and updated. |
-| /data/userfilters   | Directory where the `lancache.txt` file will be created and updated. Map it to your AdGuard Home user filters directory. |
+| Volume              | Description                                                                                             |
+|---------------------|-----------------------------------------------------------------------------------------------------------|
+| /data               | Persists the cloned `cache-domains` repository (`/data/cache-domains`) between container restarts.         |
+| /data/config.json   | Your `config.json` (see `scripts/config.example.json`), mounted read-only. Controls IPs and combined/per-CDN output. |
+| /userfilters        | Directory where the generated AdGuard rule file(s) (e.g. `lancache.txt`) are written. Map it to your AdGuard Home user filters directory. |
+
+The container clones `cache-domains` and generates the rewrite rules immediately on startup, then again once per day at 02:00 (container local time) via an internal cron job (BusyBox `crond`).
 
 ## Repository Structure
-```powershell
+```shell
 📁                               # Root of the repository.
 ├─📁.github                      # GitHub workflows and templates.
 │ └─📁workflows                  # CI/CD pipeline definitions.
@@ -102,14 +110,12 @@ networks:
 │ ├─check-for-updates.sh         # Script to check for DNS rules updates.
 │ ├─entrypoint.sh                # Entrypoint script for the Docker container.
 │ └─update-dns-rewrite-rules.sh  # Script to update the DNS rewrite rules using the LanCacheDnsRewriteGen.
-├─📁src                          # Source code.
-├─.editorconfig                  # Coding styles.
 ├─.gitignore                     # Ignore build artifacts, user secrets, etc.
 ├─LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
 └─README.md                      # You're reading this right now.
 ```
 
 ## Used technologies & frameworks
-- [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-- [ConsoleAppFramework](https://github.com/Cysharp/ConsoleAppFramework)
+- [Alpine Linux](https://alpinelinux.org/)
+- [jq](https://jqlang.github.io/jq/)
 - [Docker](https://www.docker.com/)
