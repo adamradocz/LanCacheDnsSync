@@ -1,7 +1,7 @@
 # LanCache DNS Sync
 
 LanCache DNS Sync designed to automate the synchronization of LanCache DNS entries. It fetches DNS records daily, used by LanCache, and updates the local DNS server (AdGuard Home) configuration.
-It serves users who already have a running local DNS server (AdGuard Home) in their LAN and wish to use that server to resolve DNS queries for LanCache, instead of using the default LanCache-DNS container.
+It serves users who already have a running local DNS server (AdGuard Home) in their LAN and wish to use that server to resolve DNS queries for LanCache, instead of using the default [LanCache-DNS](https://github.com/lancachenet/lancache-dns) container.
 
 ## Usage
 
