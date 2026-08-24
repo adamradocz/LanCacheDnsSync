@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 # POSIX/ash version, Alpine-friendly.
-# This is the POSIX/BusyBox-ash-compatible counterpart of bash.sh, no
+# This is the POSIX/BusyBox-ash-compatible counterpart of create-adguardhome.sh, no
 # bashisms ([[ ]], arrays, ${var^}, BASH_REMATCH, <<<, process substitution).
-# It is otherwise kept in sync feature-for-feature with bash.sh.
+# It is otherwise kept in sync feature-for-feature with create-adguardhome.sh.
 #
 # Functionally equivalent port of uklans/cache-domains/scripts/create-adguardhome.sh,
 # optimized for speed and, with added header for generated files.
@@ -141,7 +141,6 @@ fi
 # Writes the AdGuard comment header to a freshly created output file.
 write_header() {
 	{
-		echo "!"
 		echo "! Title: LanCache DNS rewrite"
 		echo "! Description: AdGuard DNS filtering rules for redirecting download requests to LanCache caching proxy server."
 		echo "! Version: ${lastmodified}"

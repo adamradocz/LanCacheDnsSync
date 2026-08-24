@@ -96,7 +96,6 @@ networks:
 | Volume              | Description                                                                                             |
 |---------------------|-----------------------------------------------------------------------------------------------------------|
 | /data               | Persists the cloned `cache-domains` repository (`/data/cache-domains`) between container restarts.         |
-| /data/config.json   | Your `config.json` (see `scripts/config.example.json`), mounted read-only. Controls IPs and combined/per-CDN output. |
 | /userfilters        | Directory where the generated AdGuard rule file(s) (e.g. `lancache.txt`) are written. Map it to your AdGuard Home user filters directory. |
 
 The container clones `cache-domains` and generates the rewrite rules immediately on startup, then again once per day at 02:00 (container local time) via an internal cron job (BusyBox `crond`).
@@ -108,8 +107,8 @@ The container clones `cache-domains` and generates the rewrite rules immediately
 │ └─📁workflows                  # CI/CD pipeline definitions.
 ├─📁scripts                      # Helper scripts for Docker.
 │ ├─check-for-updates.sh         # Script to check for DNS rules updates.
-│ ├─entrypoint.sh                # Entrypoint script for the Docker container.
-│ └─update-dns-rewrite-rules.sh  # Script to update the DNS rewrite rules using the LanCacheDnsRewriteGen.
+│ ├─create-adguardhome-ash.sh    # POSIX/ash script for Alpine Docker container.
+│ └─entrypoint.sh                # Entrypoint script for the Docker container.
 ├─.gitignore                     # Ignore build artifacts, user secrets, etc.
 ├─LICENSE                        # Defines the legal terms under which others can use, modify, and distribute the code.
 └─README.md                      # You're reading this right now.

@@ -13,7 +13,7 @@ fi
 
 generate_rules() {
     cd /app
-    ./create-adguardhome-apline.sh
+    ./create-adguardhome-ash.sh
     cp -fv output/adguardhome/*.txt /userfilters
 }
 

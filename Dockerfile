@@ -11,8 +11,8 @@ RUN apk add --no-cache git jq su-exec shadow \
 
 WORKDIR /app
 
-COPY scripts/create-adguardhome-apline.sh scripts/check-for-updates.sh scripts/entrypoint.sh ./
-RUN chmod +x ./create-adguardhome-apline.sh ./check-for-updates.sh ./entrypoint.sh
+COPY scripts/create-adguardhome-ash.sh scripts/check-for-updates.sh scripts/entrypoint.sh ./
+RUN chmod +x ./create-adguardhome-ash.sh ./check-for-updates.sh ./entrypoint.sh
 
 # CACHE_DOMAINS_REPO - git URL to clone; always uses the repo's default branch.
 ENV CACHE_DOMAINS_REPO="https://github.com/uklans/cache-domains.git"
