@@ -48,4 +48,4 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/lancache-dns-sync:latest
           provenance: true
           sbom: true
-          platforms: all
+          platforms: linux/amd64,linux/arm64
