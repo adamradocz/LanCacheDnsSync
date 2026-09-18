@@ -24,7 +24,7 @@ jobs:
         with:
           base-image: alpine:latest
           image: ${{ secrets.DOCKERHUB_USERNAME }}/lancache-dns-sync:latest
-          platforms: 'all'
+          platforms: linux/amd64,linux/arm64
 
   rebuild-and-push:
     name: Rebuild and push image
