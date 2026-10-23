@@ -38,6 +38,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Extract Docker image metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/lancache-dns-sync
+          tags: |
+            # set latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
@@ -45,7 +54,9 @@ jobs:
           file: ./Dockerfile
           pull: true
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/lancache-dns-sync:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
           provenance: true
           sbom: true
           platforms: linux/amd64
